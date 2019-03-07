@@ -124,7 +124,7 @@ def main():
         ca_certs=ca_certs,
         client_key=client_key)
 
-    mapping = {'index': 'not_analyzed', 'type': 'string'}
+    mapping = {'type': 'keyword'}
 
     print("Mapping used for string:" + str(mapping))
 
