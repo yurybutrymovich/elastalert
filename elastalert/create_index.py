@@ -124,14 +124,7 @@ def main():
         ca_certs=ca_certs,
         client_key=client_key)
 
-    esversion = es.info()["version"]["number"]
-    print("Elastic Version:" + esversion.split(".")[0])
-    elasticversion = int(esversion.split(".")[0])
-
-    if(elasticversion > 5):
-        mapping = {'type': 'keyword'}
-    else:
-        mapping = {'index': 'not_analyzed', 'type': 'string'}
+    mapping = {'index': 'not_analyzed', 'type': 'string'}
 
     print("Mapping used for string:" + str(mapping))
 
@@ -223,18 +216,13 @@ def main():
             return None
 
     # (Re-)Create indices.
-    if (elasticversion > 5):
-        index_names = (
-            index,
-            index + '_status',
-            index + '_silence',
-            index + '_error',
-            index + '_past',
-        )
-    else:
-        index_names = (
-            index,
-        )
+    index_names = (
+        index,
+        index + '_status',
+        index + '_silence',
+        index + '_error',
+        index + '_past',
+    )
     for index_name in index_names:
         if es_index.exists(index_name):
             print('Deleting index ' + index_name + '.')
@@ -248,20 +236,12 @@ def main():
     # To avoid a race condition. TODO: replace this with a real check
     time.sleep(2)
 
-    if(elasticversion > 5):
-        es.indices.put_mapping(index=index, doc_type='elastalert', body=es_mapping)
-        es.indices.put_mapping(index=index + '_status', doc_type='elastalert_status', body=ess_mapping)
-        es.indices.put_mapping(index=index + '_silence', doc_type='silence', body=silence_mapping)
-        es.indices.put_mapping(index=index + '_error', doc_type='elastalert_error', body=error_mapping)
-        es.indices.put_mapping(index=index + '_past', doc_type='past_elastalert', body=past_mapping)
-        print('New index %s created' % index)
-    else:
-        es.indices.put_mapping(index=index, doc_type='elastalert', body=es_mapping)
-        es.indices.put_mapping(index=index, doc_type='elastalert_status', body=ess_mapping)
-        es.indices.put_mapping(index=index, doc_type='silence', body=silence_mapping)
-        es.indices.put_mapping(index=index, doc_type='elastalert_error', body=error_mapping)
-        es.indices.put_mapping(index=index, doc_type='past_elastalert', body=past_mapping)
-        print('New index %s created' % index)
+    es.indices.put_mapping(index=index, doc_type='elastalert', body=es_mapping)
+    es.indices.put_mapping(index=index + '_status', doc_type='elastalert_status', body=ess_mapping)
+    es.indices.put_mapping(index=index + '_silence', doc_type='silence', body=silence_mapping)
+    es.indices.put_mapping(index=index + '_error', doc_type='elastalert_error', body=error_mapping)
+    es.indices.put_mapping(index=index + '_past', doc_type='past_elastalert', body=past_mapping)
+    print('New index %s created' % index)
 
     if old_index:
         print("Copying all data from old index '{0}' to new index '{1}'".format(old_index, index))
